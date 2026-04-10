@@ -1,0 +1,299 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#0f0f0f;color:#e8e6e0;font-family:'Inter',sans-serif;font-weight:300;}
+  .app{max-width:680px;margin:0 auto;padding:2.5rem 1.5rem 4rem;}
+
+  .top-label{font-size:11px;letter-spacing:.1em;color:#555;text-transform:uppercase;margin-bottom:.4rem;}
+  h1{font-size:2rem;font-weight:300;color:#e8e6e0;line-height:1.2;margin-bottom:.3rem;}
+  .subtitle{font-size:13px;color:#555;margin-bottom:2.5rem;}
+
+  .divider{border:none;border-top:1px solid #1e1e1e;margin:2rem 0;}
+
+  .section-title{font-size:11px;letter-spacing:.1em;color:#444;text-transform:uppercase;margin-bottom:1rem;}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.5rem;}
+  .chip{
+    padding:7px 16px;border-radius:20px;font-size:13px;font-weight:300;
+    border:1px solid #2a2a2a;color:#666;cursor:pointer;background:#0f0f0f;
+    transition:all .15s;user-select:none;
+  }
+  .chip:hover{border-color:#444;color:#aaa;}
+  .chip.active{background:#1a1a1a;border-color:#555;color:#e8e6e0;}
+
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem;}
+  .fields.three{grid-template-columns:1fr 1fr 1fr;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:11px;letter-spacing:.06em;color:#444;text-transform:uppercase;}
+  .field input,.field select{
+    background:#141414;border:1px solid #222;border-radius:4px;
+    padding:9px 11px;font-size:14px;font-weight:300;color:#e8e6e0;
+    font-family:'Inter',sans-serif;outline:none;transition:border-color .15s;
+    -webkit-appearance:none;
+  }
+  .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23444'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+  .field input:focus,.field select:focus{border-color:#444;}
+  .field input::placeholder{color:#333;}
+
+  .gen-btn{
+    width:100%;padding:13px;background:#0f0f0f;border:1px solid #2a2a2a;
+    border-radius:4px;font-size:14px;font-weight:300;color:#666;
+    cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:.02em;
+    transition:all .15s;margin-top:.5rem;
+  }
+  .gen-btn:hover{border-color:#555;color:#e8e6e0;}
+  .gen-btn:active{transform:scale(.99);}
+  .gen-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+  .loading{text-align:center;padding:2.5rem 0;color:#444;font-size:13px;display:none;}
+
+  .result{display:none;margin-top:2.5rem;}
+  .result-header{margin-bottom:2rem;}
+  .result-header .prog-title{font-size:1.6rem;font-weight:300;color:#e8e6e0;margin-bottom:.3rem;}
+  .result-header .prog-meta{font-size:12px;color:#444;}
+
+  .week-grid{display:flex;flex-direction:column;gap:0;}
+  .day-row{
+    display:grid;grid-template-columns:80px 1fr auto;align-items:start;
+    padding:14px 0;border-bottom:1px solid #1a1a1a;gap:16px;
+  }
+  .day-name{font-size:12px;color:#444;padding-top:2px;}
+  .day-content{}
+  .session-name{font-size:14px;color:#e8e6e0;margin-bottom:6px;}
+  .session-detail{font-size:12px;color:#555;}
+  .exos{margin-top:8px;display:flex;flex-direction:column;gap:4px;}
+  .exo{display:flex;justify-content:space-between;font-size:12px;gap:12px;}
+  .exo-name{color:#aaa;}
+  .exo-detail{color:#444;white-space:nowrap;}
+
+  .badge{
+    font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+    padding:3px 9px;border-radius:3px;font-weight:400;white-space:nowrap;
+    margin-top:2px;
+  }
+  .badge-repos{background:#1a1a1a;color:#444;border:1px solid #222;}
+  .badge-facile{background:#0d1f0d;color:#4a7c4a;border:1px solid #1a2e1a;}
+  .badge-intensif{background:#1f0d0d;color:#7c4a4a;border:1px solid #2e1a1a;}
+  .badge-seuil{background:#1a1508;color:#7c6a30;border:1px solid #2e2510;}
+  .badge-longue{background:#0d1525;color:#3a5a8a;border:1px solid #1a2540;}
+  .badge-leger{background:#151015;color:#6a4a7a;border:1px solid #251530;}
+
+  .prog-desc{font-size:13px;color:#555;line-height:1.7;margin-bottom:2rem;padding-top:.5rem;}
+
+  .error{color:#7c4a4a;font-size:13px;padding:1rem 0;}
+
+  .dot::after{content:'';animation:dotdot 1.2s steps(4,end) infinite;}
+  @keyframes dotdot{0%,100%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+</style>
+
+<div class="app">
+  <div class="top-label">Programme sportif</div>
+  <h1>Générateur IA</h1>
+  <p class="subtitle">Remplis ton profil — ton programme de la semaine est généré automatiquement</p>
+
+  <hr class="divider">
+
+  <div class="section-title">Profil</div>
+  <div class="fields three">
+    <div class="field"><label>Âge</label><input type="number" id="age" placeholder="28" min="10" max="90"></div>
+    <div class="field"><label>Poids (kg)</label><input type="number" id="weight" placeholder="75"></div>
+    <div class="field"><label>Taille (cm)</label><input type="number" id="height" placeholder="178"></div>
+  </div>
+  <div class="fields">
+    <div class="field"><label>Sexe</label>
+      <select id="gender"><option value="">—</option><option value="homme">Homme</option><option value="femme">Femme</option></select>
+    </div>
+    <div class="field"><label>Niveau</label>
+      <select id="level"><option value="">—</option><option value="débutant">Débutant</option><option value="intermédiaire">Intermédiaire</option><option value="avancé">Avancé</option></select>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title">Objectif principal</div>
+  <div class="chips" id="goals">
+    <div class="chip" data-val="perte de poids">Perte de poids</div>
+    <div class="chip" data-val="prise de masse">Prise de masse</div>
+    <div class="chip" data-val="renforcement musculaire">Renforcement</div>
+    <div class="chip" data-val="endurance cardio">Cardio</div>
+    <div class="chip" data-val="mobilité et flexibilité">Mobilité</div>
+    <div class="chip" data-val="remise en forme générale">Remise en forme</div>
+    <div class="chip" data-val="performance sportive">Performance</div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title">Disponibilités</div>
+  <div class="fields">
+    <div class="field"><label>Séances / semaine</label>
+      <select id="days"><option value="">—</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option><option value="5">5×</option></select>
+    </div>
+    <div class="field"><label>Durée / séance</label>
+      <select id="duration"><option value="">—</option><option value="30">30 min</option><option value="45">45 min</option><option value="60">1h</option><option value="90">1h30</option></select>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title">Équipement disponible</div>
+  <div class="chips" id="equipment">
+    <div class="chip" data-val="poids du corps uniquement">Sans matériel</div>
+    <div class="chip" data-val="haltères">Haltères</div>
+    <div class="chip" data-val="barre et disques">Barre + disques</div>
+    <div class="chip" data-val="machines de salle de sport">Machines</div>
+    <div class="chip" data-val="kettlebell">Kettlebell</div>
+    <div class="chip" data-val="bandes élastiques">Élastiques</div>
+    <div class="chip" data-val="cardio machines (vélo, rameur, tapis)">Cardio machines</div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title">Limitations / blessures (optionnel)</div>
+  <div class="fields" style="grid-template-columns:1fr;margin-bottom:0;">
+    <div class="field"><input type="text" id="injuries" placeholder="Ex : douleur genou gauche, dos fragile…"></div>
+  </div>
+
+  <hr class="divider">
+
+  <button class="gen-btn" id="genBtn" onclick="generate()">Générer mon programme →</button>
+
+  <div class="loading" id="loading"><span class="dot">Génération en cours</span></div>
+
+  <div class="result" id="result">
+    <div class="result-header">
+      <div class="prog-title" id="progTitle">Programme</div>
+      <div class="prog-meta" id="progMeta"></div>
+    </div>
+    <p class="prog-desc" id="progDesc"></p>
+    <div class="week-grid" id="weekGrid"></div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.chips').forEach(g=>{
+  g.querySelectorAll('.chip').forEach(c=>{
+    c.addEventListener('click',()=>{
+      if(g.id==='goals') g.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+      c.classList.toggle('active');
+    });
+  });
+});
+
+function getSelected(id){
+  return [...document.querySelectorAll(`#${id} .chip.active`)].map(c=>c.dataset.val).join(', ');
+}
+
+const badgeClass = {repos:'badge-repos',facile:'badge-facile',intensif:'badge-intensif',seuil:'badge-seuil',longue:'badge-longue',leger:'badge-leger',léger:'badge-leger'};
+
+async function generate(){
+  const level=document.getElementById('level').value;
+  const days=document.getElementById('days').value;
+  const duration=document.getElementById('duration').value;
+  const goal=getSelected('goals');
+
+  if(!level||!days||!duration||!goal){
+    document.getElementById('result').style.display='block';
+    document.getElementById('progTitle').textContent='Informations manquantes';
+    document.getElementById('progDesc').textContent='';
+    document.getElementById('weekGrid').innerHTML='<p class="error">Merci de renseigner : niveau, objectif, nombre de séances et durée.</p>';
+    return;
+  }
+
+  const btn=document.getElementById('genBtn');
+  btn.disabled=true;
+  document.getElementById('loading').style.display='block';
+  document.getElementById('result').style.display='none';
+
+  const age=document.getElementById('age').value;
+  const weight=document.getElementById('weight').value;
+  const height=document.getElementById('height').value;
+  const gender=document.getElementById('gender').value;
+  const equipment=getSelected('equipment');
+  const injuries=document.getElementById('injuries').value;
+
+  const profile=[age&&`${age} ans`,weight&&`${weight} kg`,height&&`${height} cm`,gender].filter(Boolean).join(', ');
+
+  const prompt=`Tu es un coach sportif expert. Génère un programme d'entraînement hebdomadaire personnalisé.
+
+Profil : ${profile||'non précisé'}
+Niveau : ${level}
+Objectif : ${goal}
+Séances par semaine : ${days} (sur 7 jours, les autres sont repos)
+Durée par séance : ${duration} min
+Équipement : ${equipment||'non précisé'}
+${injuries?`Limitations : ${injuries}`:''}
+
+Réponds UNIQUEMENT avec un objet JSON valide, sans markdown, sans texte avant ou après :
+{
+  "titre": "Nom court du programme",
+  "description": "Une phrase décrivant l'approche globale",
+  "semaine": [
+    {
+      "jour": "Lundi",
+      "repos": false,
+      "nom": "Nom de la séance",
+      "type": "intensif",
+      "detail": "Description courte (volume, focus)",
+      "exercices": [
+        { "nom": "Nom exercice", "detail": "3 × 10-12 · repos 60s" }
+      ]
+    }
+  ]
+}
+Le champ "type" doit être l'un de : repos, facile, intensif, seuil, longue, leger
+Pour les jours de repos : "repos":true, "exercices":[], "type":"repos"
+Inclure exactement 7 entrées dans "semaine" (lun→dim), avec ${days} jours d'entraînement.`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    const raw=data.content?.map(b=>b.text||'').join('');
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const prog=JSON.parse(clean);
+
+    document.getElementById('progTitle').textContent=prog.titre||'Programme personnalisé';
+    document.getElementById('progMeta').textContent=`${days} séances · ${duration} min · ${level} · ${goal}`;
+    document.getElementById('progDesc').textContent=prog.description||'';
+
+    let html='';
+    for(const j of prog.semaine){
+      const bc=badgeClass[j.type]||'badge-repos';
+      html+=`<div class="day-row">
+        <span class="day-name">${j.jour}</span>
+        <div class="day-content">`;
+      if(j.repos){
+        html+=`<span class="session-name" style="color:#333;">Repos</span>`;
+      } else {
+        html+=`<div class="session-name">${j.nom||''}</div>`;
+        if(j.detail) html+=`<div class="session-detail">${j.detail}</div>`;
+        if(j.exercices&&j.exercices.length){
+          html+=`<div class="exos">`;
+          for(const ex of j.exercices){
+            html+=`<div class="exo"><span class="exo-name">${ex.nom}</span><span class="exo-detail">${ex.detail}</span></div>`;
+          }
+          html+=`</div>`;
+        }
+      }
+      html+=`</div><div><span class="badge ${bc}">${j.type||'repos'}</span></div></div>`;
+    }
+
+    document.getElementById('weekGrid').innerHTML=html;
+    document.getElementById('result').style.display='block';
+  }catch(e){
+    document.getElementById('weekGrid').innerHTML='<p class="error">Erreur lors de la génération. Réessaie.</p>';
+    document.getElementById('result').style.display='block';
+  }finally{
+    btn.disabled=false;
+    document.getElementById('loading').style.display='none';
+  }
+}
+</script>
